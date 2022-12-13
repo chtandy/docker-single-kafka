@@ -21,6 +21,11 @@ services:
       - ./data/zookeeper:/bitnami/zookeeper
     depends_on:
       - init
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   kafka:
     container_name: kafka
@@ -33,13 +38,20 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
       - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://${DomainName}:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://${IP}:9093
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_HEAP_OPTS=-Xmx2048m -Xms2048m
+      - KAFKA_CFG_LOG_RETENTION_HOURS=${RETENTION_HOURS}
     volumes:
       - ./data/kafka:/bitnami/kafka
     depends_on:
       - init
       - zookeeper
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -51,5 +63,10 @@ services:
     ports:
       - 8080:8080
     environment:
-      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_NAME=nexdata
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5" 
